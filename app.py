@@ -37,7 +37,7 @@ def extract_features(text, age, race):
 
 # Streamlit UI
 st.title("🧬 Cancer Risk Predictor Demo")
-st.write("Enter your symptoms, age, and race to assess possible cancer risk.")
+st.write("Enter your symptoms, age, and race to assess possible  brain cancer risk.")
 
 user_text = st.text_area("Describe your symptoms (e.g. headache, fatigue, blurry vision):")
 user_age = st.slider("Your age", 18, 90, 50)
