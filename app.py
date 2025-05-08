@@ -12,7 +12,7 @@ SYMPTOM_LIST = [f for f in feature_names if f not in ["race_encoded", "age_years
 # App layout
 st.title("🧬 Cancer Risk Prediction Demo")
 
-st.markdown("Enter your information and symptoms to check your estimated cancer risk:")
+st.markdown("Enter your information and symptoms to check your estimated brain cancer risk:")
 
 # User inputs
 age = st.slider("Age", 10, 100, 40)
