@@ -1,58 +1,38 @@
 # app.py
 import streamlit as st
-import pandas as pd
 import joblib
+import numpy as np
+import pandas as pd
 
-# Load model and trained feature list
-model, trained_columns = joblib.load("cancer_risk_model.pkl")
+# Load model and feature names
+model, feature_names = joblib.load("cancer_risk_model.pkl")
 
-# Symptom keywords → model feature mapping
-SYMPTOM_FEATURES = ["blurry_vision", "dizziness", "fatigue", "headache", "nausea", "pain", "seizure"]
+SYMPTOM_LIST = [f for f in feature_names if f not in ["race_encoded", "age_years"]]
 
-SYMPTOM_KEYWORDS = {
-    "headache": "headache",
-    "vision": "blurry_vision",
-    "blurry": "blurry_vision",
-    "seizure": "seizure",
-    "nausea": "nausea",
-    "fatigue": "fatigue",
-    "pain": "pain",
-    "dizzy": "dizziness",
-    "dizziness": "dizziness"
-}
+# App layout
+st.title("🧬 Cancer Risk Prediction Demo")
 
-def extract_features(text, age, race):
-    features = {sym: 0 for sym in SYMPTOM_FEATURES}
-    for word, key in SYMPTOM_KEYWORDS.items():
-        if word in text.lower():
-            features[key] = 1
-    features["age_years"] = age
-    features["race_encoded"] = 0 if race == "White" else 1
-    # Align with training columns
-    df = pd.DataFrame([features])
-    for col in trained_columns:
-        if col not in df.columns:
-            df[col] = 0
-    return df[trained_columns]
+st.markdown("Enter your information and symptoms to check your estimated cancer risk:")
 
-# Streamlit UI
-st.title("🧬 Cancer Risk Predictor Demo")
-st.write("Enter your symptoms, age, and race to assess possible  brain cancer risk.")
+# User inputs
+age = st.slider("Age", 10, 100, 40)
+race = st.radio("Race", options=["White", "Black or African American"])
+symptom_text = st.text_input("Describe your symptoms (comma-separated):", placeholder="e.g. headache, fatigue")
 
-user_text = st.text_area("Describe your symptoms (e.g. headache, fatigue, blurry vision):")
-user_age = st.slider("Your age", 18, 90, 50)
-user_race = st.selectbox("Race", ["White", "Black or African American"])
+# Parse symptoms into feature flags
+user_symptoms = [s.strip().lower() for s in symptom_text.split(",") if s.strip()]
+symptom_flags = [1 if symptom in user_symptoms else 0 for symptom in SYMPTOM_LIST]
 
-if st.button("Predict Risk"):
-    if not user_text.strip():
-        st.warning("Please describe your symptoms.")
-    else:
-        input_df = extract_features(user_text, user_age, user_race)
-        prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0][1]
+# Encode race
+race_encoded = 0 if race.lower() == "white" else 1
 
-        st.markdown(f"### 🔍 Risk Prediction: {'🟥 High' if prediction else '🟩 Low'}")
-        st.markdown(f"**Model Confidence:** `{round(probability * 100, 2)}%`")
+# Build feature vector in correct order
+input_data = [race_encoded, age] + symptom_flags
+input_df = pd.DataFrame([input_data], columns=feature_names)
 
-        with st.expander("🔬 Feature Breakdown"):
-            st.write(input_df.T.rename(columns={0: "Value"}))
+# Predict and display
+if st.button("Predict Cancer Risk"):
+    prediction = model.predict(input_df)[0]
+    probability = model.predict_proba(input_df)[0][1]
+    st.success(f"Risk Prediction: {'High' if prediction == 1 else 'Low'}")
+    st.write(f"Confidence: **{probability * 100:.2f}%**")
