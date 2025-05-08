@@ -1,5 +1,4 @@
-# app.py
-# app.py
+ # app.py
 import streamlit as st
 import joblib
 import pandas as pd
@@ -68,5 +67,5 @@ if st.button("Predict Cancer Risk"):
     st.bar_chart(feature_contrib)
 
 st.markdown("---")
-st.info("This tool is powered by real clinical data from the NIH GDC (May 2025).")
-st.caption("Developed by Melanie, Desiree and Jola • Final Presentation • Spring 2025")
+st.info("This tool is powered by real clinical data from the NIH GDC (May 2025). For educational purposes only — not intended for diagnostic or clinical use.")
+st.caption("Developed by Melanie, Desiree, and Jola • Final Presentation • Spring 2025")
